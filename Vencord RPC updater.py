@@ -14,6 +14,9 @@ from datetime import datetime, timedelta
 from colorama import Fore
 import re, json, shutil, os, subprocess, chromedriver_autoinstaller
 
+## Vencord settings file
+vencordrpcfile = 'C:/Users/Administrator/AppData/Roaming/Vencord/settings/settings.json'
+
 os.system("taskkill /im discord.exe /f") # Close Discord
 
 def debug():
@@ -92,8 +95,6 @@ def prog(urldate):
 	daysnext = min(n for n in dtdifflist if n.days>0) # find days until next chapter
 
 	### Editing Vencord Settings File
-
-	vencordrpcfile = 'C:/Users/Administrator/AppData/Roaming/Vencord/settings/settings.json'
 	shutil.copy(vencordrpcfile, 'settings_backup.json') # Create backup of settings file
 
 	f = open(vencordrpcfile,'r')
