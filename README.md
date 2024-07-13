@@ -1,4 +1,4 @@
-# Vencord RPC Updater
+# One Piece Vencord RPC Updater
 - This program sets your Discord Rich Presence (RPC) to information regarding the next scheduled One Piece chapter.
 - It requires Vencord to set a custom RPC.
 - Data is scraped from [claystage.com](https://claystage.com/one-piece-chapter-release-schedule-for-2024), thanks!
