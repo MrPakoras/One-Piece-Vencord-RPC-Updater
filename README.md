@@ -13,8 +13,8 @@
 
 ## Set up the Custom RPC plugin
 - Install [Vencord](https://vencord.dev/download/)
-- Once installed, open Discord and go to User Settings
-- Under the Vencord section go to Plugins
+- Once installed, open Discord and go to `User Settings`
+- Under the Vencord section go to `Plugins`
 - Search for `CustomRPC` and enable it
 - Click the settings icon and paste your Discord Application ID
 - Enter an Application Name
@@ -22,6 +22,6 @@
 
 ## Set up the Python program
 - Under the Vencord section in Discord settings, click `Open Settings Folder`
-- Copy the address of the `settings.json` file in the "settings" folder
+- Copy the address of the `settings.json` file in the `settings` folder
 - Enter the path as the `vencordrpcfile` variable in the Python program
 - Run it!
