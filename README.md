@@ -3,7 +3,7 @@
 - It requires Vencord to set a custom RPC.
 - Data is scraped from claystage.com, thanks!
 
-![Alt text](relative%20https://i.imgur.com/Dj1cifC.png?raw=true "Title")
+![Alt text](https://i.imgur.com/Dj1cifC.png?raw=true "Title")
 https://i.imgur.com/Dj1cifC.png
 
 # How to use:
