@@ -3,8 +3,7 @@
 - It requires Vencord to set a custom RPC.
 - Data is scraped from claystage.com, thanks!
 
-![Alt text](https://i.imgur.com/Dj1cifC.png?raw=true "Title")
-https://i.imgur.com/Dj1cifC.png
+![Vencord RPC](https://i.imgur.com/Dj1cifC.png?raw=true "Vencord RPC")
 
 # How to use:
 ## Set up a Discord Application:
