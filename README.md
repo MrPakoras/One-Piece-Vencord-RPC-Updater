@@ -12,7 +12,7 @@
 - Copy your "Application ID"
 
 ## Set up the Custom RPC plugin
-- Install Vencord from [https://vencord.dev/download/](https://vencord.dev/download/)
+- Install [Vencord](https://vencord.dev/download/)
 - Once installed, open Discord and go to User Settings
 - Under the Vencord section go to Plugins
 - Search for "CustomRPC" and enable it
