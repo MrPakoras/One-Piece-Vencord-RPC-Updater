@@ -101,6 +101,10 @@ def prog(urldate):
 	fj = json.load(f)
 	f.close()
 
+
+	# Set image
+	fj['plugins']['CustomRPC']['imageBig'] = f'https://i.imgur.com/Ev64NP6.gif'
+
 	# Set Days until next chapter text
 	fj['plugins']['CustomRPC']['details'] = f'{daysnext.days} days until Chapter {chapters[dtdifflist.index(daysnext)]}'
 
@@ -113,13 +117,17 @@ def prog(urldate):
 	## Check table for items surrounding current date
 
 	# Get the start and end dates of this week
+	# currentweekstart = dt - timedelta(days=dt.weekday())
+	# currentweekend = dt + timedelta(days=dt.weekday())
+
 	currentweekstart = dt - timedelta(days=dt.weekday())
-	currentweekend = dt + timedelta(days=dt.weekday())
-	print(f'>> {currentweekstart} to {currentweekend}')
+	currentweekend = currentweekstart + timedelta(days=6)
+
+	print(f'>> {datetime.strftime(currentweekstart, '%B %d, %Y')} to {datetime.strftime(currentweekend, '%B %d, %Y')}')
 
 	for d in dates:
 		if re.search(r'1000.*', str(d)): # If BREAK week
-			continue
+			pass
 		else:
 			if currentweekstart <= datetime.strptime(d, '%B %d, %Y') <= currentweekend: # If chapter lies in current week
 				global thisweekindex
