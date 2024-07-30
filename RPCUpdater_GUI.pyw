@@ -15,14 +15,15 @@ from colorama import Fore
 from customtkinter import *
 from customtkinter import filedialog
 
+from RPCUpdater.py import *
 
 ## Vencord settings file
 defaultrpcpath = os.path.expandvars(f'%APPDATA%/Vencord/settings/settings.json') # Appdata/Roaming/ folder
 
 master = CTk()
-master.geometry("600x400")
+master.geometry("600x500")
 set_default_color_theme('green')
-rows = ['title', 'pathselect', 'fileselect', 'message', 'run'] # Index of rows so I dont have to manually update each .grid
+rows = ['title', 'pathselect', 'fileselect', 'correction', 'message', 'run'] # Index of rows so I dont have to manually update each .grid
 
 colourmain = '#8d73ff'
 colourdark = '#3b2b7d'
@@ -35,7 +36,7 @@ title_label.grid(row=rows.index('title'), column=0)
 pathselect_frame = CTkFrame(master)
 pathselect_frame.grid(row=rows.index('pathselect'),column=0,padx=10,pady=10)
 
-path_label = CTkLabel(pathselect_frame, text='Choose your settings.json file path location', font=('Calibri', 20), text_color=colourmain)
+path_label = CTkLabel(pathselect_frame, text='Choose your settings.json file path location', font=('Calibri', 20), text_color=colourmain, justify='center')
 path_label.grid(row=0, column=0)
 
 def setpath():
@@ -47,15 +48,20 @@ def setpath():
 
 pathvar = IntVar(value=0)
 
-default_select = CTkRadioButton(pathselect_frame, text=f'Use Default Path', command=setpath, variable=pathvar, value=0, fg_color=colourmain, border_color=colourmain, hover_color=colourdark)#, border_width_unchecked=2, border_width_checked=3)
-default_select.grid(row=1, column=0)
+radio_frame = CTkFrame(pathselect_frame) # frame for radio buttons
+radio_frame.grid(row=2, column=0)
 
-custom_select = CTkRadioButton(pathselect_frame, text=f'Set Custom Path', command=setpath, variable=pathvar, value=1, fg_color=colourmain, border_color=colourmain, hover_color=colourdark)#, border_width_unchecked=2, border_width_checked=3)
-custom_select.grid(row=1, column=1)
+default_select = CTkRadioButton(radio_frame, text=f'Use Default Path', command=setpath, variable=pathvar, value=0, fg_color=colourmain, border_color=colourmain, hover_color=colourdark)#, border_width_unchecked=2, border_width_checked=3)
+default_select.grid(row=0, column=0, padx=10)
+
+custom_select = CTkRadioButton(radio_frame, text=f'Set Custom Path', command=setpath, variable=pathvar, value=1, fg_color=colourmain, border_color=colourmain, hover_color=colourdark)#, border_width_unchecked=2, border_width_checked=3)
+custom_select.grid(row=0, column=1, padx=10)
 
 ## File select
 file_frame = CTkFrame(master)
 file_frame.grid(row=rows.index('fileselect'),column=0,padx=10,pady=10)
+file_frame.columnconfigure(0, weight=5)
+file_frame.columnconfigure(1, weight=1)
 file_frame.pack_propagate(0)
 
 file_label = CTkLabel(file_frame, text='Choose settings.json', width=400, anchor='w', wraplength=0)
@@ -72,6 +78,23 @@ def openfile():
 
 openfolder_button = CTkButton(file_frame, text='Open File', command=openfile, fg_color=colourmain, hover_color=colourdark, text_color='white', text_color_disabled='black', state='disabled')
 openfolder_button.grid(row=0,column=1)
+
+## Date Correction
+correction_frame = CTkFrame(master)
+correction_frame.grid(row=rows.index('correction'),column=0,padx=10,pady=10)
+
+# Insert todays date for chapter release
+today_label = CTkLabel(correction_frame, text='Was a chapter released today?')
+today_label.grid(row=0, column=0, padx=10)
+
+today_check = CTkCheckBox(correction_frame, text='')
+today_check.grid(row=0, column=1)
+
+today_label = CTkLabel(correction_frame, text='Break next week?')
+today_label.grid(row=0, column=3)
+
+break_check = CTkCheckBox(correction_frame, text='')
+break_check.grid(row=0, column=4, padx=10)
 
 ## Messages
 message_frame = CTkFrame(master, width=550)

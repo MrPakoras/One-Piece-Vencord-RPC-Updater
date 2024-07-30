@@ -126,15 +126,16 @@ def prog(urldate):
 	print(f'>> {datetime.strftime(currentweekstart, '%B %d, %Y')} to {datetime.strftime(currentweekend, '%B %d, %Y')}')
 
 	for d in dates:
-		if re.search(r'1000.*', str(d)): # If BREAK week
+		if re.search(r'1000.*', str(d)): # If BREAK week			
+			nextweekchapter = chapters[latestindex+2] # If break week, next chapter is 2 weeks from last released chapter
 			pass
 		else:
 			if currentweekstart <= datetime.strptime(d, '%B %d, %Y') <= currentweekend: # If chapter lies in current week
 				global thisweekindex
 				thisweekindex = dates.index(d) # Index of item in table for this week
 				lcws = datetime.strptime(dates[thisweekindex], '%B %d, %Y') # Latest chapter week start - changed to this week
+				nextweekchapter = chapters[thisweekindex+1]
 
-	nextweekchapter = chapters[thisweekindex+1]
 	if re.search(r'.* Break', nextweekchapter):
 		
 		# We know next week is break, therefore:

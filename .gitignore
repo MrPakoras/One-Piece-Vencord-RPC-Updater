@@ -2,4 +2,4 @@
 "/chromedriver downloader.py"
 "/Vencord RPC backup.py"
 settings_backup.json
-"/Image Editor.py"
+"./Image Editor.py"
