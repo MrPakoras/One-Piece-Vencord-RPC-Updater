@@ -136,7 +136,8 @@ def prog(urldate):
 				lcws = datetime.strptime(dates[thisweekindex], '%B %d, %Y') # Latest chapter week start - changed to this week
 				nextweekchapter = chapters[thisweekindex+1]
 
-	if re.search(r'.* Break', nextweekchapter):
+
+	if re.search(r'.* Break', chapters[thisweekindex+1]): # Search what is happening next week
 		
 		# We know next week is break, therefore:
 		# If today is in latest chapter week - BREAK NEXT WEEK
