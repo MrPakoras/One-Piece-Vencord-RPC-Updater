@@ -23,11 +23,13 @@ dt = datetime.now()
 currdt = dt.strftime('%B %d, %Y')
 
 def discord_process(option): # made it a function so its easier to debug
-	pass
-	# if option == 0:
-	# 	os.system("taskkill /im discord.exe /f") # Close Discord
-	# if option == 1:
-	# 	subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
+	# pass
+	if option == 0:
+		os.system("taskkill /im discord.exe /f") # Close Discord
+	if option == 1:
+		# Finding latest folder - When Discord updates it creates a new folder
+		appdatalocal = os.getenv('LOCALAPPDATA') # Get %APPDATA%/Local folder path
+		subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
 
 discord_process(0) # close discord
 
@@ -206,9 +208,6 @@ def prog(urldate):
 
 	driver.quit()
 
-	# Finding latest folder - When Discord updates it creates a new folder
-	appdatalocal = os.getenv('LOCALAPPDATA') # Get %APPDATA%/Local folder path
-	
 	discord_process(1) # Open Discord
 
 
