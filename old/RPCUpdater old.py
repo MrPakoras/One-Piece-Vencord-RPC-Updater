@@ -15,39 +15,17 @@ from colorama import Fore
 import re, json, shutil, os, subprocess, chromedriver_autoinstaller
 
 ## Vencord settings file
-appdata = os.getenv('APPDATA') # %APPDATA%
+appdata = os.getenv('APPDATA')
 vencordrpcfile = f'{appdata}/Vencord/settings/settings.json'
 
-## Date
-dt = datetime.now()
-currdt = dt.strftime('%B %d, %Y')
-
-def discord_process(option): # made it a function so its easier to debug
-	pass
-	# if option == 0:
-	# 	os.system("taskkill /im discord.exe /f") # Close Discord
-	# if option == 1:
-	# 	subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
-
-discord_process(0) # close discord
+os.system("taskkill /im discord.exe /f") # Close Discord
 
 def debug():
 	n = 1
 	for x in ['Last', 'Current', 'Next']:
-		# debuginfo = f'{Fore.MAGENTA}>> {x} Chapter: {chapters[thisweekindex-n]}\n{Fore.YELLOW}- Date: {Fore.GREEN}{dates[thisweekindex-n]} - {weeks[thisweekindex-n]}'
+		debuginfo = f'{Fore.MAGENTA}>> {x} Chapter: {chapters[thisweekindex-n]}\n{Fore.YELLOW}- Date: {Fore.GREEN}{dates[thisweekindex-n]} - {weeks[thisweekindex-n]}'
 		print(debuginfo)
 		n -= 1
-
-def get_week(date): # Gets the start and end dates of the week which date falls within
-	date = datetime.strptime(date, '%B %d, %Y')
-	weekstart = date - timedelta(days=date.weekday())
-	weekend = weekstart + timedelta(days=6)
-
-	print(f'>> {Fore.CYAN}{datetime.strftime(weekstart, '%B %d, %Y')} {Fore.YELLOW}to {Fore.CYAN}{datetime.strftime(weekend, '%B %d, %Y')}')
-
-	week = (weekstart, weekend)
-	return week
-
 
 def prog(urldate):
 	# PATH = 'W:/Python/Python Web Scraping/chromedriver.exe' # Chrome Driver path
@@ -59,11 +37,16 @@ def prog(urldate):
 	options.add_argument('window-size=1920x1080')
 	options.add_argument('log-level=3')
 
+	# service = Service(executable_path=PATH) - not needed anymore because chromedriver_autoinstaller adds chromedriver to PATH
+
+	# driver = wd.Chrome(service=service,options=options)
 	driver = wd.Chrome(options=options)
 	driver.get(url) # Opens URL in browser
 
 	# Search on page for the next date that a chapter will release
 
+	dt = datetime.now()
+	currdt = dt.strftime('%B %d, %Y')
 	print(currdt)
 
 	# Accept cookies
@@ -105,48 +88,7 @@ def prog(urldate):
 
 	timenow = datetime.strptime(currdt, '%B %d, %Y')
 	dtdifflist = [x-timenow if x != tdfiller else tdfiller for x in dtlist] # list of datetime differences from time now
-	
-
-
-	dtdl_cleaned = [] # dtdifflist with break weeks replaced with "break" instead of "1000 days"
-	# [dtdl_cleaned.append(re.sub(r'1000 days.*', 'Break', str(x))) for x in dtdifflist]
-	for x in dtdifflist:
-		if re.match(r'1000 days.*', str(x)):
-			dtdl_cleaned.append('Break')
-		else:
-			dtdl_cleaned.append(x)
-
-	
-
-	# Finding the highest dt difference thats < 0 and the lowest dt diff thats >0 - current week lies within these values
-	latest_chapter = max(n for n in dtdifflist if n.days<=0)
-	next_chapter = min(n for n in dtdifflist if n.days>=0)
-	
-	latest_index = dtdifflist.index(latest_chapter)
-	latest_date = dates[latest_index]
-	next_date = dates[dtdifflist.index(next_chapter)]
-
-	for x in dtdl_cleaned[latest_index+1:]: # dtdl list starting from latest chapter+1 (skip latest to get to next chapter)
-		if x == 'Break':
-			pass 
-		else:
-			next_chap_index = dtdl_cleaned.index(x)
-			break
-
-	[print(x) for x in dtdl_cleaned[latest_index:next_chap_index+1]] # Print dtdl from last chapter to next chapter (inclusive)
-
-	next_chap_date = dates[next_chap_index] # get next event skipping "Break"
-	print(f'Latest: {latest_date} | Next: {next_date}')
-
-	currentweekstart = dt - timedelta(days=dt.weekday())
-	currentweekend = currentweekstart + timedelta(days=6)
-
-	# print(f'>> {datetime.strftime(currentweekstart, '%B %d, %Y')} to {datetime.strftime(currentweekend, '%B %d, %Y')}')
-
-	latest_week = get_week(latest_date) # Week of latest chapter
-	current_week = get_week(currdt) # Current week
-	next_week = get_week(next_date) # Week of next event (chapter/break)
-	next_chap_week = get_week(next_chap_date) # Week of next chapter
+	# [print(f'nth: {x[0]} - value: {x[1]}') for x in enumerate(dtdifflist)] - checking list
 
 	latest = max(n for n in dtdifflist if n.days<=0) # find the timedela for the latest released chapter
 	global latestindex
@@ -161,39 +103,71 @@ def prog(urldate):
 	f.close()
 
 
-	## Set image
+	# Set image
 	fj['plugins']['CustomRPC']['imageBig'] = f'https://i.imgur.com/Ev64NP6.gif'
 
-	## Set Days until next chapter text
+	# Set Days until next chapter text
 	fj['plugins']['CustomRPC']['details'] = f'{daysnext.days} days until Chapter {chapters[dtdifflist.index(daysnext)]}'
 
 	
-	## Setting break text
 
-	##################################################################################
-	## NEEDS HANDLING FOR WHEN CURRENT WEEK IS CHAPTER WEEK, THEN CHECK WEEK AFTER ###
-	##################################################################################
+	## Set break/no break text
 
-	if current_week == next_chap_week: # If the upcoming chapter is this week, check next event
-		next_event = dtdl_cleaned[dtdifflist.index(next_chapter)+1]
-		print(f'>> {Fore.CYAN}Next event: {Fore.MAGENTA}{chapters[dtdl_cleaned.index(next_event)]} {Fore.CYAN}in {Fore.YELLOW}{next_event}')
-		if next_event == 'Break':
-			status = 'BREAK NEXT WEEK! 😢' 
+	# https://stackoverflow.com/questions/19216334/python-give-start-and-end-of-week-data-from-a-given-date
+
+	## Check table for items surrounding current date
+
+	# Get the start and end dates of this week
+	# currentweekstart = dt - timedelta(days=dt.weekday())
+	# currentweekend = dt + timedelta(days=dt.weekday())
+
+	currentweekstart = dt - timedelta(days=dt.weekday())
+	currentweekend = currentweekstart + timedelta(days=6)
+
+	print(f'>> {datetime.strftime(currentweekstart, '%B %d, %Y')} to {datetime.strftime(currentweekend, '%B %d, %Y')}')
+
+	for d in dates:
+		if re.search(r'1000.*', str(d)): # If BREAK week			
+			nextweekchapter = chapters[latestindex+2] # If break week, next chapter is 2 weeks from last released chapter
+			pass
 		else:
-			status = 'NO BREAK NEXT WEEK! 😃'
-	elif next_week == next_chap_date: # No break next week
-		status = 'NO BREAK NEXT WEEK! 😃'
-	elif current_week == latest_week and next_week != next_chap_week: # Break next week
-		status = 'BREAK NEXT WEEK! 😢' 
-	elif current_week != next_chap_week and current_week != latest_week: # Break this week
-		status = 'BREAK THIS WEEK! 😢'
-	else:
-		status = 'IDK when tf the break is cuh.'
-	
-	# Set RPC status
-	fj['plugins']['CustomRPC']['state'] = status
-	print(status)
+			if currentweekstart <= datetime.strptime(d, '%B %d, %Y') <= currentweekend: # If chapter lies in current week
+				global thisweekindex
+				thisweekindex = dates.index(d) # Index of item in table for this week
+				lcws = datetime.strptime(dates[thisweekindex], '%B %d, %Y') # Latest chapter week start - changed to this week
+				nextweekchapter = chapters[thisweekindex+1]
 
+
+	if re.search(r'.* Break', nextweekchapter): # Search what is happening next week
+		
+		# We know next week is break, therefore:
+		# If today is in latest chapter week - BREAK NEXT WEEK
+		# Else - BREAK THIS WEEK
+		
+		
+		# lcws = datetime.strptime(dates[latestindex], '%B %d, %Y') # Latest chapter week start
+		weekstart = lcws - timedelta(days=dt.weekday()-1) # Start of week containing break
+		weekend = weekstart + timedelta(days=6) # End of week containing next chapter
+
+		# print(f'{Fore.YELLOW}1) {weekstart}\n2) {dt}\n3) {weekend}')
+
+ 		# Get current dt
+ 		# Find which week lies in current dt
+ 		# Get index
+
+		if weekstart <= dt <= weekend: # If current date is in the week of the latest released chapter, then next chapter is break
+			fj['plugins']['CustomRPC']['state'] = 'BREAK NEXT WEEK! 😢'
+		else: # Date is not therefore this is a break week
+			fj['plugins']['CustomRPC']['state'] = 'BREAK THIS WEEK! 😢'
+
+		# Get current chapter (closest date before today)
+		# Get next chapter date
+		# Get week of current chapter
+		# Get week of next chapter
+		# If today lies in next week chapter week then break
+
+	else:
+		fj['plugins']['CustomRPC']['state'] = 'NO BREAK NEXT WEEK! 😃'
 
 	# Set Read button to latest chapter
 	fj['plugins']['CustomRPC']['buttonOneText'] = f'Read Ch. {chapters[dtdifflist.index(latest)]}'
@@ -208,8 +182,9 @@ def prog(urldate):
 
 	# Finding latest folder - When Discord updates it creates a new folder
 	appdatalocal = os.getenv('LOCALAPPDATA') # Get %APPDATA%/Local folder path
+	subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
 	
-	discord_process(1) # Open Discord
+	debug()
 
 
 try:

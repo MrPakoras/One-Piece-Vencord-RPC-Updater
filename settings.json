@@ -119,10 +119,12 @@
             "timestampMode": 2,
             "appID": "1144376602935951400",
             "appName": "one piece",
-            "details": "Testing 1",
-            "imageBig": "https://i.imgur.com/gm8TKe8.jpg",
-            "state": "Testing 2",
-            "imageBigTooltip": ""
+            "details": "7 days until Chapter 1123",
+            "imageBig": "https://i.imgur.com/Ev64NP6.gif",
+            "state": "BREAK THIS WEEK! \ud83d\ude22",
+            "imageBigTooltip": "",
+            "buttonOneText": "Read Ch. 1122",
+            "buttonOneURL": "https://mangareader.to/read/one-piece-3/en/chapter-1122"
         },
         "DisableDMCallIdle": {
             "enabled": false

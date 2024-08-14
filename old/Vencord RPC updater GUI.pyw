@@ -16,7 +16,8 @@ from customtkinter import *
 from customtkinter import filedialog
 
 ## Vencord settings file
-vencordrpcfile = 'C:/Users/Administrator/AppData/Roaming/Vencord/settings/settings.json'
+appdata = os.getenv('APPDATA')
+vencordrpcfile = f'{appdata}/Vencord/settings/settings.json'
 
 os.system("taskkill /im discord.exe /f") # Close Discord
 
