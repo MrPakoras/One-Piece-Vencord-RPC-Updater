@@ -147,7 +147,10 @@ def prog(urldate):
 
 	latest_week = get_week(latest_date) # Week of latest chapter
 	current_week = get_week(currdt) # Current week
+	
+	# Need to change this to actuall get the next weeks event without skipping break weeks
 	next_week = get_week(next_date) # Week of next event (chapter/break)
+
 	next_chap_week = get_week(next_chap_date) # Week of next chapter
 
 	latest = max(n for n in dtdifflist if n.days<=0) # find the timedela for the latest released chapter
