@@ -2,7 +2,6 @@
 # Changes discord RPC text to info from above
 
 # 2025 update: Website now doesnt show leak dates as theyre not accurate, so program has switched to show official release date instead.
-# 31/01/25: It also added "Oda Break", "WSJ Break", and dashes, so I had to add handling for that.
 
 
 from selenium import webdriver as wd
@@ -34,7 +33,7 @@ def discord_process(option): # made it a function so its easier to debug
 		appdatalocal = os.getenv('LOCALAPPDATA') # Get %APPDATA%/Local folder path
 		subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
 
-discord_process(0) # close discord
+# discord_process(0) # close discord
 
 def debug():
 	n = 1
@@ -90,32 +89,30 @@ def prog(urldate):
 
 	# https://stackoverflow.com/questions/75552030/how-can-i-print-out-all-text-in-a-web-table-column-in-python-using-selenium
 	for row in rows:
-		items = row.find_elements(by=By.TAG_NAME, value='td')
-
-		for cell in items: # for each cell in the row
-			if items.index(cell) == 0: # If 1st cell, then its the weeks cell
-				weeks.append(cell.text)
-			if items.index(cell) == 1: # If 2nd cell, then its the chapters cell
-				chapters.append(cell.text)
-
-				if cell.text in ['WSJ Break', 'Oda Break', '—']: # If break weeks, fill with high timedelta
+		columns = row.find_elements(by=By.TAG_NAME, value='td')
+		
+		for index, col in enumerate(columns):
+			if index == 0:
+				weeks.append(col.text)
+			if index == 1:
+				print(col.text)
+				chapters.append(col.text)
+			if index == 3: # 2025 update: Website now doesnt show leak dates as theyre not accurate, so program has switched to show official release date instead.
+				if col.text == '—': # End of year
+					break
+					prog(datetime.now().strftime('%Y')+1)
+				elif re.search(r"[A-Z][a-z]* [0-9][0-9]?, [0-9][0-9][0-9][0-9]", col.text):
+					dates.append(col.text)
+				else:
 					dates.append(tdfiller)
-				else: # If normal chapter, then get date
-					dates.append(items[3].text)
-
-
-			# 	## needs handling for when its the last week of the year and next chapter is in the next year
-
-	from itertools import zip_longest
-	[print(x) for x in enumerate(zip_longest(weeks, chapters, dates, fillvalue='[BLANK]'))]
-
-
 
 	print(f'{Fore.CYAN}>> Calculating...')
 	dtlist = [datetime.strptime(x, '%B %d, %Y') if x != tdfiller else tdfiller for x in dates] # List comprehension of dates in datetime format
 
 	timenow = datetime.strptime(currdt, '%B %d, %Y')
-	dtdifflist = [x-timenow if x != tdfiller else tdfiller for x in dtlist] # list of datetime differences from time now	
+	dtdifflist = [x-timenow if x != tdfiller else tdfiller for x in dtlist] # list of datetime differences from time now
+	print(dtdifflist)
+	
 
 
 	dtdl_cleaned = [] # dtdifflist with break weeks replaced with "break" instead of "1000 days"
@@ -125,6 +122,8 @@ def prog(urldate):
 			dtdl_cleaned.append('Break')
 		else:
 			dtdl_cleaned.append(x)
+
+	print(dtdl_cleaned)
 
 	
 
@@ -219,7 +218,7 @@ def prog(urldate):
 
 	driver.quit()
 
-	discord_process(1) # Open Discord
+	# discord_process(1) # Open Discord
 
 
 try:

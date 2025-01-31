@@ -2,7 +2,6 @@
 # Changes discord RPC text to info from above
 
 # 2025 update: Website now doesnt show leak dates as theyre not accurate, so program has switched to show official release date instead.
-# 31/01/25: It also added "Oda Break", "WSJ Break", and dashes, so I had to add handling for that.
 
 
 from selenium import webdriver as wd
@@ -17,31 +16,10 @@ from datetime import datetime, timedelta
 from colorama import Fore
 import re, json, shutil, os, subprocess, chromedriver_autoinstaller
 
-## Vencord settings file
-appdata = os.getenv('APPDATA') # %APPDATA%
-vencordrpcfile = f'{appdata}/Vencord/settings/settings.json'
 
 ## Date
 dt = datetime.now()
 currdt = dt.strftime('%B %d, %Y')
-
-def discord_process(option): # made it a function so its easier to debug
-	# pass
-	if option == 0:
-		os.system("taskkill /im discord.exe /f") # Close Discord
-	if option == 1:
-		# Finding latest folder - When Discord updates it creates a new folder
-		appdatalocal = os.getenv('LOCALAPPDATA') # Get %APPDATA%/Local folder path
-		subprocess.Popen(f'{appdatalocal}/Discord/Update.exe --processStart Discord.exe') # Open Discord
-
-discord_process(0) # close discord
-
-def debug():
-	n = 1
-	for x in ['Last', 'Current', 'Next']:
-		# debuginfo = f'{Fore.MAGENTA}>> {x} Chapter: {chapters[thisweekindex-n]}\n{Fore.YELLOW}- Date: {Fore.GREEN}{dates[thisweekindex-n]} - {weeks[thisweekindex-n]}'
-		print(debuginfo)
-		n -= 1
 
 def get_week(date): # Gets the start and end dates of the week which date falls within
 	date = datetime.strptime(date, '%B %d, %Y')
@@ -90,32 +68,28 @@ def prog(urldate):
 
 	# https://stackoverflow.com/questions/75552030/how-can-i-print-out-all-text-in-a-web-table-column-in-python-using-selenium
 	for row in rows:
-		items = row.find_elements(by=By.TAG_NAME, value='td')
-
-		for cell in items: # for each cell in the row
-			if items.index(cell) == 0: # If 1st cell, then its the weeks cell
-				weeks.append(cell.text)
-			if items.index(cell) == 1: # If 2nd cell, then its the chapters cell
-				chapters.append(cell.text)
-
-				if cell.text in ['WSJ Break', 'Oda Break', '—']: # If break weeks, fill with high timedelta
+		columns = row.find_elements(by=By.TAG_NAME, value='td')
+		
+		for index, col in enumerate(columns):
+			if index == 0:
+				weeks.append(col.text)
+			if index == 1:
+				chapters.append(col.text)
+			if index == 3: # 2025 update: Website now doesnt show leak dates as theyre not accurate, so program has switched to show official release date instead.
+				if col.text == '—': # End of year
+					break
+					prog(datetime.now().strftime('%Y')+1)
+				elif re.search(r"[A-Z][a-z]* [0-9][0-9]?, [0-9][0-9][0-9][0-9]", col.text):
+					dates.append(col.text)
+				else:
 					dates.append(tdfiller)
-				else: # If normal chapter, then get date
-					dates.append(items[3].text)
-
-
-			# 	## needs handling for when its the last week of the year and next chapter is in the next year
-
-	from itertools import zip_longest
-	[print(x) for x in enumerate(zip_longest(weeks, chapters, dates, fillvalue='[BLANK]'))]
-
-
 
 	print(f'{Fore.CYAN}>> Calculating...')
 	dtlist = [datetime.strptime(x, '%B %d, %Y') if x != tdfiller else tdfiller for x in dates] # List comprehension of dates in datetime format
 
 	timenow = datetime.strptime(currdt, '%B %d, %Y')
-	dtdifflist = [x-timenow if x != tdfiller else tdfiller for x in dtlist] # list of datetime differences from time now	
+	dtdifflist = [x-timenow if x != tdfiller else tdfiller for x in dtlist] # list of datetime differences from time now
+	
 
 
 	dtdl_cleaned = [] # dtdifflist with break weeks replaced with "break" instead of "1000 days"
@@ -166,60 +140,32 @@ def prog(urldate):
 	latestindex = dtdifflist.index(latest) # Index for latest chapter
 	daysnext = min(n for n in dtdifflist if n.days>0) # find days until next chapter
 
-	### Editing Vencord Settings File
-	shutil.copy(vencordrpcfile, 'settings_backup.json') # Create backup of settings file
-
-	f = open(vencordrpcfile,'r')
-	fj = json.load(f)
-	f.close()
 
 
-	## Set image
-	fj['plugins']['CustomRPC']['imageBig'] = f'https://i.imgur.com/Ev64NP6.gif'
+	##########################################
+	##   1) Get current week by date        ##
+	##   2) Get week number in table        ##
+	##   3) Get next week number in table   ##
+	##   4) Read next weeks itinerary       ##
+	##########################################
 
-	## Set Days until next chapter text
-	fj['plugins']['CustomRPC']['details'] = f'{daysnext.days} days until Chapter {chapters[dtdifflist.index(daysnext)]}'
 
+	# 1) Get current week by date
+
+	date_to_get = currdt # format = Full month day, year - eg. January 1, 2025
+	current_week = get_week(date_to_get) # Current week
+
+	print(f'>> Current week is:   {current_week}')
+
+	# 2) 
 	
-	## Setting break text
-
-	##################################################################################
-	## NEEDS HANDLING FOR WHEN CURRENT WEEK IS CHAPTER WEEK, THEN CHECK WEEK AFTER ###
-	##################################################################################
-
-	if current_week == next_chap_week: # If the upcoming chapter is this week, check next event
-		next_event = dtdl_cleaned[dtdifflist.index(next_chapter)+1]
-		print(f'>> {Fore.CYAN}Next event: {Fore.MAGENTA}{chapters[dtdl_cleaned.index(next_event)]} {Fore.CYAN}in {Fore.YELLOW}{next_event}')
-		if next_event == 'Break':
-			status = 'BREAK NEXT WEEK! 😢' 
-		else:
-			status = 'NO BREAK NEXT WEEK! 😃'
-	elif next_week == next_chap_date: # No break next week
-		status = 'NO BREAK NEXT WEEK! 😃'
-	elif current_week == latest_week and next_week != next_chap_week: # Break next week
-		status = 'BREAK NEXT WEEK! 😢' 
-	elif current_week != next_chap_week and current_week != latest_week: # Break this week
-		status = 'BREAK THIS WEEK! 😢'
-	else:
-		status = '' # idk when the break is
-	
-	# Set RPC status
-	fj['plugins']['CustomRPC']['state'] = status
-	print(status)
 
 
-	# Set Read button to latest chapter
-	fj['plugins']['CustomRPC']['buttonOneText'] = f'Read Ch. {chapters[dtdifflist.index(latest)]}'
-	fj['plugins']['CustomRPC']['buttonOneURL'] = f'https://mangareader.to/read/one-piece-3/en/chapter-{chapters[dtdifflist.index(latest)]}'
 
 
-	f = open(vencordrpcfile,'w')
-	fjd = json.dump(fj, f, indent=4)
-	f.close()
 
 	driver.quit()
 
-	discord_process(1) # Open Discord
 
 
 try:
